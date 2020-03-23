@@ -15,7 +15,7 @@ func init() {
 
 func newServer() {
 	r := mux.NewRouter()
-	routes.initAuthRoutes(r);
+	routes.init(r);
 	r.HandleFunc("/books/{title}/page/{page}", func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
 			title := vars["title"]

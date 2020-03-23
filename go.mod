@@ -1,4 +1,4 @@
-module auth-api
+module github.com/constellatehq/auth-api
 
 go 1.14
 

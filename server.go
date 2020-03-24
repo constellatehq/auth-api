@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/mux"
 	// "github.com/gorilla/handlers"
 	"github.com/constellatehq/auth-api/routes"
-	"github.com/constellatehq/auth-api/handlers"
 )
 
 func init() {

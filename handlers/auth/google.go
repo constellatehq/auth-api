@@ -1,4 +1,4 @@
-package handlers
+package auth
 
 import (
 	"fmt"
@@ -11,14 +11,8 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-type RedirectUrl = struct {
-	Url		string	`json:"url"`
-}
-
 var (
 	googleOauthConfig *oauth2.Config
-	// TODO: randomize it
-	oauthStateString = "pseudo-random"
 )
 
 func InitGoogleClient() {
@@ -36,7 +30,6 @@ func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 
-	// http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	redirectUrl := RedirectUrl{url}
 	json.NewEncoder(w).Encode(redirectUrl)
 }

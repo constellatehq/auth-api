@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"github.com/joho/godotenv"
 	"github.com/gorilla/mux"
-	// "github.com/gorilla/handlers"
+	"github.com/constellatehq/auth-api/handlers/auth"
 	"github.com/constellatehq/auth-api/routes"
 )
 
@@ -16,7 +16,8 @@ func init() {
 		log.Print("No .env file found")
 	}
 
-	handlers.InitGoogleClient()
+	auth.InitGoogleClient()
+	auth.InitFacebookClient()
 }
 
 type Status struct {

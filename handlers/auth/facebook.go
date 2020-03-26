@@ -15,11 +15,12 @@ import (
 
 var (
   facebookOauthConfig *oauth2.Config
+  facebookRedirectUrl = "https://localhost:8000/auth/facebook/callback"
 )
 
 func InitFacebookClient() {
   facebookOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8000/auth/facebook/callback",
+		RedirectURL:  facebookRedirectUrl,
 		ClientID:     os.Getenv("FACEBOOK_CLIENT_ID"),
 		ClientSecret: os.Getenv("FACEBOOK_CLIENT_SECRET"),
     Scopes:       []string{"public_profile"},

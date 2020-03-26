@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"github.com/gorilla/mux"
+
 	"github.com/constellatehq/auth-api/handlers/auth"
 	"github.com/constellatehq/auth-api/routes"
 )
@@ -31,26 +33,33 @@ func newServer() {
 
 func main() {
 
+	cors := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"}, // All origins
+		AllowedMethods: []string{"GET"}, // Allowing only get, just an example
+	})
+
 	newServer()
-	r := mux.NewRouter()
-	r.Use(loggingMiddleware)
-	r.Use(mux.CORSMethodMiddleware(r))
-	routes.InitRoutes(r);
-	r.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+	router := mux.NewRouter()
+	router.Use(loggingMiddleware)
+	router.Use(mux.CORSMethodMiddleware(router))
+	routes.InitRoutes(router);
+	router.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		status := Status{200, "Server is healthy"}
 
     json.NewEncoder(w).Encode(status)
 	})
 
+	handler := cors.Handler(router)
+
 	srv := &http.Server{
-		Handler:      r,
+		Handler:      handler,
 		Addr:         "127.0.0.1:8000",
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	log.Fatal(srv.ListenAndServeTLS("https-server.crt", "https-server.key"))
 
 }
 

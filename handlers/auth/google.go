@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -13,12 +12,12 @@ import (
 
 var (
 	googleOauthConfig *oauth2.Config
+	googleRedirectUrl = "https://localhost:8000/auth/google/callback"
 )
 
 func InitGoogleClient() {
-	log.Println("Client id:", os.Getenv("GOOGLE_CLIENT_ID"))
 	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8000/auth/google/callback",
+		RedirectURL:  googleRedirectUrl,
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},

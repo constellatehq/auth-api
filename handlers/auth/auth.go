@@ -1,7 +1,7 @@
 package auth
 
 type RedirectUrl = struct {
-	Url		string	`json:"url"`
+	RedirectUrl		string	`json:"redirect_url"`
 }
 
 var (

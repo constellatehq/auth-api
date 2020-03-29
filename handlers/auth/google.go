@@ -12,21 +12,25 @@ import (
 
 var (
 	googleOauthConfig *oauth2.Config
+	googleClientID string
+	googleClientSecret string
 	googleRedirectUrl = "https://localhost:8000/auth/google/callback"
 )
 
 func InitGoogleClient() {
+	googleClientID = os.Getenv("GOOGLE_CLIENT_ID")
+	googleClientSecret = os.Getenv("GOOGLE_CLIENT_SECRET")
+
 	googleOauthConfig = &oauth2.Config{
 		RedirectURL:  googleRedirectUrl,
-		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		ClientID:     googleClientID,
+		ClientSecret: googleClientSecret,
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
 	}
 }
 
 func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 
 	redirectUrl := RedirectUrl{url}
@@ -34,8 +38,7 @@ func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	content, err := getUserInfo(r.FormValue("state"), r.FormValue("code"))
+	content, err := getGoogleUserInfo(r.FormValue("state"), r.FormValue("code"))
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -45,7 +48,7 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Content: %s\n", content)
 }
 
-func getUserInfo(state string, code string) ([]byte, error) {
+func getGoogleUserInfo(state string, code string) ([]byte, error) {
 	if state != oauthStateString {
 		return nil, fmt.Errorf("invalid oauth state")
 	}

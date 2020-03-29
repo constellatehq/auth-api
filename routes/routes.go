@@ -15,4 +15,6 @@ func initAuthRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/google/callback", auth.GoogleCallbackHandler).Methods("GET")
 	r.HandleFunc("/auth/facebook", auth.FacebookLoginHandler).Methods("GET")
 	r.HandleFunc("/auth/facebook/callback", auth.FacebookCallbackHandler).Methods("GET")
+	r.HandleFunc("/auth/instagram", auth.InstagramLoginHandler).Methods("GET")
+	r.HandleFunc("/auth/instagram/callback", auth.InstagramCallbackHandler).Methods("GET")
 }

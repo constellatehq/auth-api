@@ -15,21 +15,26 @@ import (
 
 var (
   facebookOauthConfig *oauth2.Config
+  baseFacebookApiUrl = "https://graph.facebook.com"
+  facebookClientID string
+  facebookClientSecret string
   facebookRedirectUrl = "https://localhost:8000/auth/facebook/callback"
 )
 
 func InitFacebookClient() {
+  facebookClientID = os.Getenv("FACEBOOK_CLIENT_ID")
+  facebookClientSecret = os.Getenv("FACEBOOK_CLIENT_SECRET")
+
   facebookOauthConfig = &oauth2.Config{
 		RedirectURL:  facebookRedirectUrl,
-		ClientID:     os.Getenv("FACEBOOK_CLIENT_ID"),
-		ClientSecret: os.Getenv("FACEBOOK_CLIENT_SECRET"),
+		ClientID:     facebookClientID,
+		ClientSecret: facebookClientSecret,
     Scopes:       []string{"public_profile"},
     Endpoint:     facebook.Endpoint,
   }
 }
 
 func FacebookLoginHandler(w http.ResponseWriter, r *http.Request) {
-  w.Header().Set("Access-Control-Allow-Origin", "*")
 	url := facebookOauthConfig.AuthCodeURL(oauthStateString)
 
 	redirectUrl := RedirectUrl{url}
@@ -49,8 +54,9 @@ func FacebookCallbackHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Printf("oauthConf.Exchange() failed with '%s'\n", err)
   }
 
-  resp, err := http.Get("https://graph.facebook.com/me?access_token=" +
-    url.QueryEscape(token.AccessToken))
+  getFacebookUserUrl := baseFacebookApiUrl + "/me?access_token=" + url.QueryEscape(token.AccessToken)
+
+  resp, err := http.Get(getFacebookUserUrl)
   if err != nil {
     fmt.Printf("Get: %s\n", err)
   }

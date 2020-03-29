@@ -20,6 +20,7 @@ func init() {
 
 	auth.InitGoogleClient()
 	auth.InitFacebookClient()
+	auth.InitInstagramClient()
 }
 
 type Status struct {
@@ -60,7 +61,7 @@ func main() {
 	}
 
 	log.Fatal(srv.ListenAndServeTLS("https-server.crt", "https-server.key"))
-
+	log.Println("Server started on port 8000")
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {

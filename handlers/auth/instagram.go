@@ -33,7 +33,7 @@ func InitInstagramClient() {
 func InstagramLoginHandler(w http.ResponseWriter, r *http.Request) {
 	url := instagramOauthConfig.AuthCodeURL(oauthStateString)
 
-	redirectUrl := RedirectUrl{url}
+	redirectUrl := RedirectUrlResponse{url}
 	json.NewEncoder(w).Encode(redirectUrl)
 }
 

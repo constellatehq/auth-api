@@ -17,4 +17,6 @@ func initAuthRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/facebook/callback", auth.FacebookCallbackHandler).Methods("GET")
 	r.HandleFunc("/auth/instagram", auth.InstagramLoginHandler).Methods("GET")
 	r.HandleFunc("/auth/instagram/callback", auth.InstagramCallbackHandler).Methods("GET")
+	r.HandleFunc("/auth/spotify", auth.SpotifyLoginHandler).Methods("GET")
+	r.HandleFunc("/auth/spotify/callback", auth.SpotifyCallbackHandler).Methods("GET")
 }

@@ -1,6 +1,6 @@
 package auth
 
-type RedirectUrl = struct {
+type RedirectUrlResponse = struct {
 	RedirectUrl		string	`json:"redirect_url"`
 }
 

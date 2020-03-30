@@ -33,7 +33,7 @@ func InitGoogleClient() {
 func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 
-	redirectUrl := RedirectUrl{url}
+	redirectUrl := RedirectUrlResponse{url}
 	json.NewEncoder(w).Encode(redirectUrl)
 }
 
@@ -44,7 +44,6 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-
 	fmt.Fprintf(w, "Content: %s\n", content)
 }
 

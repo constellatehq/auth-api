@@ -21,6 +21,7 @@ func init() {
 	auth.InitGoogleClient()
 	auth.InitFacebookClient()
 	auth.InitInstagramClient()
+	auth.InitSpotifyClient()
 }
 
 type Status struct {

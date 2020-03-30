@@ -37,7 +37,7 @@ func InitFacebookClient() {
 func FacebookLoginHandler(w http.ResponseWriter, r *http.Request) {
 	url := facebookOauthConfig.AuthCodeURL(oauthStateString)
 
-	redirectUrl := RedirectUrl{url}
+	redirectUrl := RedirectUrlResponse{url}
 	json.NewEncoder(w).Encode(redirectUrl)
 }
 

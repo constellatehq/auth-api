@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/constellatehq/auth-api/server/facebookClient"
+	facebookClient "github.com/constellatehq/auth-api/server/facebook_client"
 	fb "github.com/huandu/facebook"
 	"golang.org/x/oauth2"
 )

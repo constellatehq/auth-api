@@ -12,7 +12,8 @@ import (
 
 	"github.com/constellatehq/auth-api/handlers/auth"
 	"github.com/constellatehq/auth-api/routes"
-	"github.com/constellatehq/auth-api/server/facebookClient"
+	facebookClient "github.com/constellatehq/auth-api/server/facebook_client"
+	googleClient "github.com/constellatehq/auth-api/server/google_client"
 )
 
 type Status struct {
@@ -29,7 +30,7 @@ func init() {
 		log.Print("No .env file found")
 	}
 
-	auth.InitGoogleClient()
+	googleClient.InitClient()
 	facebookClient.InitClient()
 	auth.InitInstagramClient()
 	auth.InitSpotifyClient()

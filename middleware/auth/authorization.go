@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/constellatehq/auth-api/server/facebookClient"
+	facebookClient "github.com/constellatehq/auth-api/server/facebook_client"
 	"github.com/gorilla/context"
 )
 

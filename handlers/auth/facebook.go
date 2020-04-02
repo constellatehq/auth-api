@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 
+	"github.com/constellatehq/auth-api/server/facebookClient"
+	fb "github.com/huandu/facebook"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/facebook"
 )
 
 type FBUser struct {
@@ -17,29 +17,12 @@ type FBUser struct {
 	Name string `json:"name"`
 }
 
-var (
-	facebookOauthConfig  *oauth2.Config
-	baseFacebookApiUrl   = "https://graph.facebook.com"
-	facebookClientID     string
-	facebookClientSecret string
-	facebookRedirectUrl  = "https://localhost:8000/auth/facebook/callback"
-)
-
-func InitFacebookClient() {
-	facebookClientID = os.Getenv("FACEBOOK_CLIENT_ID")
-	facebookClientSecret = os.Getenv("FACEBOOK_CLIENT_SECRET")
-
-	facebookOauthConfig = &oauth2.Config{
-		RedirectURL:  facebookRedirectUrl,
-		ClientID:     facebookClientID,
-		ClientSecret: facebookClientSecret,
-		Scopes:       []string{"public_profile"},
-		Endpoint:     facebook.Endpoint,
-	}
+func GetFacebookClientID() string {
+	return facebookClient.ClientID
 }
 
 func FacebookLoginHandler(w http.ResponseWriter, r *http.Request) {
-	url := facebookOauthConfig.AuthCodeURL(oauthStateString)
+	url := facebookClient.OauthConfig.AuthCodeURL(oauthStateString)
 
 	redirectUrl := RedirectUrlResponse{url}
 	json.NewEncoder(w).Encode(redirectUrl)
@@ -53,12 +36,25 @@ func FacebookCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	code := r.FormValue("code")
 
-	token, err := facebookOauthConfig.Exchange(oauth2.NoContext, code)
+	token, err := facebookClient.OauthConfig.Exchange(oauth2.NoContext, code)
 	if err != nil {
 		fmt.Printf("oauthConf.Exchange() failed with '%s'\n", err)
 	}
+	fmt.Println("FB Access Token:", url.QueryEscape(token.AccessToken))
 
-	getFacebookUserUrl := baseFacebookApiUrl + "/me?access_token=" + url.QueryEscape(token.AccessToken)
+	session := facebookClient.GlobalApp.Session(token.AccessToken)
+
+	res, err := session.Get("/me", fb.Params{
+		"fields": "id,first_name,last_name",
+	})
+
+	if err != nil {
+		fmt.Printf("FB Client error: %s\n", err)
+	}
+
+	fmt.Println("### Facebook sdk call:", res["id"], res["first_name"])
+
+	getFacebookUserUrl := facebookClient.BASE_API_URL + "/me?access_token=" + url.QueryEscape(token.AccessToken)
 
 	resp, err := http.Get(getFacebookUserUrl)
 	if err != nil {

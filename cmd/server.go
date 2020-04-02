@@ -12,6 +12,7 @@ import (
 
 	"github.com/constellatehq/auth-api/handlers/auth"
 	"github.com/constellatehq/auth-api/routes"
+	"github.com/constellatehq/auth-api/server/facebookClient"
 )
 
 type Status struct {
@@ -29,7 +30,7 @@ func init() {
 	}
 
 	auth.InitGoogleClient()
-	auth.InitFacebookClient()
+	facebookClient.InitFacebookClient()
 	auth.InitInstagramClient()
 	auth.InitSpotifyClient()
 }

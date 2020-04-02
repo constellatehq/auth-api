@@ -2,15 +2,20 @@ package routes
 
 import (
 	"github.com/gorilla/mux"
+
 	"github.com/constellatehq/auth-api/handlers/auth"
+	"github.com/constellatehq/auth-api/handlers/user"
+	authMiddleware "github.com/constellatehq/auth-api/middleware/auth"
 )
 
 func InitRoutes(r *mux.Router) {
 	initAuthRoutes(r)
+	initUserRoutes(r)
 }
 
-func initAuthRoutes(r *mux.Router) (*mux.Router) {
+func initAuthRoutes(r *mux.Router) *mux.Router {
 	authRouter := r.PathPrefix("/auth").Subrouter()
+	// authRouter.Use(authMiddleware.GenerateAuthMiddleware())
 	authRouter.HandleFunc("/google", auth.GoogleLoginHandler).Methods("GET")
 	authRouter.HandleFunc("/google/callback", auth.GoogleCallbackHandler).Methods("GET")
 	authRouter.HandleFunc("/facebook", auth.FacebookLoginHandler).Methods("GET")
@@ -21,4 +26,12 @@ func initAuthRoutes(r *mux.Router) (*mux.Router) {
 	authRouter.HandleFunc("/spotify/callback", auth.SpotifyCallbackHandler).Methods("GET")
 
 	return authRouter
+}
+
+func initUserRoutes(r *mux.Router) *mux.Router {
+	userRouter := r.PathPrefix("/user").Subrouter()
+	userRouter.Use(authMiddleware.GenerateAuthMiddleware())
+	userRouter.HandleFunc("/profile", user.UserProfileHandler).Methods("GET")
+
+	return userRouter
 }

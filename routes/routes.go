@@ -9,14 +9,16 @@ func InitRoutes(r *mux.Router) {
 	initAuthRoutes(r)
 }
 
-func initAuthRoutes(r *mux.Router) {
-	// authRouter := r.PathPrefix("/auth").Subrouter()
-	r.HandleFunc("/auth/google", auth.GoogleLoginHandler).Methods("GET")
-	r.HandleFunc("/auth/google/callback", auth.GoogleCallbackHandler).Methods("GET")
-	r.HandleFunc("/auth/facebook", auth.FacebookLoginHandler).Methods("GET")
-	r.HandleFunc("/auth/facebook/callback", auth.FacebookCallbackHandler).Methods("GET")
-	r.HandleFunc("/auth/instagram", auth.InstagramLoginHandler).Methods("GET")
-	r.HandleFunc("/auth/instagram/callback", auth.InstagramCallbackHandler).Methods("GET")
-	r.HandleFunc("/auth/spotify", auth.SpotifyLoginHandler).Methods("GET")
-	r.HandleFunc("/auth/spotify/callback", auth.SpotifyCallbackHandler).Methods("GET")
+func initAuthRoutes(r *mux.Router) (*mux.Router) {
+	authRouter := r.PathPrefix("/auth").Subrouter()
+	authRouter.HandleFunc("/google", auth.GoogleLoginHandler).Methods("GET")
+	authRouter.HandleFunc("/google/callback", auth.GoogleCallbackHandler).Methods("GET")
+	authRouter.HandleFunc("/facebook", auth.FacebookLoginHandler).Methods("GET")
+	authRouter.HandleFunc("/facebook/callback", auth.FacebookCallbackHandler).Methods("GET")
+	authRouter.HandleFunc("/instagram", auth.InstagramLoginHandler).Methods("GET")
+	authRouter.HandleFunc("/instagram/callback", auth.InstagramCallbackHandler).Methods("GET")
+	authRouter.HandleFunc("/spotify", auth.SpotifyLoginHandler).Methods("GET")
+	authRouter.HandleFunc("/spotify/callback", auth.SpotifyCallbackHandler).Methods("GET")
+
+	return authRouter
 }

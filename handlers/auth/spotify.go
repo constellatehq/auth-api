@@ -1,23 +1,24 @@
 package auth
 
 import (
+	"encoding/json"
 	"fmt"
-	"log"
-	"time"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
-	"encoding/json"
+	"time"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/spotify"
 )
 
 var (
-	spotifyOauthConfig *oauth2.Config
-	baseSpotifyApiUrl = "https://api.spotify.com/v1"
-	spotifyClientID string
+	spotifyOauthConfig  *oauth2.Config
+	baseSpotifyApiUrl   = "https://api.spotify.com/v1"
+	spotifyClientID     string
 	spotifyClientSecret string
-	spotifyRedirectUrl = "https://localhost:8000/auth/spotify/callback"
+	spotifyRedirectUrl  = "https://localhost:8000/auth/spotify/callback"
 )
 
 func InitSpotifyClient() {
@@ -32,6 +33,7 @@ func InitSpotifyClient() {
 		Endpoint:     spotify.Endpoint,
 	}
 }
+
 func SpotifyLoginHandler(w http.ResponseWriter, r *http.Request) {
 	url := spotifyOauthConfig.AuthCodeURL(oauthStateString)
 
@@ -49,7 +51,6 @@ func SpotifyCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Content: %s\n", content)
 }
-
 
 func getSpotifyUserInfo(state string, code string) ([]byte, error) {
 	if state != oauthStateString {
@@ -74,7 +75,7 @@ func makeAuthRequest(url string, accessToken string) ([]byte, error) {
 		log.Fatal("Error reading request. ", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer " + accessToken)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 
 	client := &http.Client{Timeout: time.Second * 10}
 

@@ -1,20 +1,21 @@
 package auth
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"encoding/json"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
 var (
-	googleOauthConfig *oauth2.Config
-	googleClientID string
+	googleOauthConfig  *oauth2.Config
+	googleClientID     string
 	googleClientSecret string
-	googleRedirectUrl = "https://localhost:8000/auth/google/callback"
+	googleRedirectUrl  = "https://localhost:8000/auth/google/callback"
 )
 
 func InitGoogleClient() {

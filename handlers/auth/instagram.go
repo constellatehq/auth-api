@@ -1,21 +1,22 @@
 package auth
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"encoding/json"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/instagram"
 )
 
 var (
-	instagramOauthConfig *oauth2.Config
-	baseInstagramApiUrl = "https://graph.instagram.com"
-	instagramClientID string
+	instagramOauthConfig  *oauth2.Config
+	baseInstagramApiUrl   = "https://graph.instagram.com"
+	instagramClientID     string
 	instagramClientSecret string
-	instagramRedirectUrl = "https://localhost:8000/auth/instagram/callback"
+	instagramRedirectUrl  = "https://localhost:8000/auth/instagram/callback"
 )
 
 func InitInstagramClient() {
@@ -47,7 +48,6 @@ func InstagramCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Content: %s\n", content)
 }
-
 
 func getInstagramUserInfo(state string, code string) ([]byte, error) {
 	if state != oauthStateString {

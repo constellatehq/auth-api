@@ -1,9 +1,6 @@
 package facebookClient
 
 import (
-	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 
 	fb "github.com/huandu/facebook"
@@ -23,7 +20,7 @@ var (
 	GlobalApp    *fb.App
 )
 
-func InitFacebookClient() {
+func InitClient() {
 	ClientID = os.Getenv("FACEBOOK_CLIENT_ID")
 	ClientSecret = os.Getenv("FACEBOOK_CLIENT_SECRET")
 
@@ -36,19 +33,4 @@ func InitFacebookClient() {
 		Scopes:       []string{"public_profile"},
 		Endpoint:     facebook.Endpoint,
 	}
-}
-
-func MakeRequest(url string) []byte {
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("Get: %s\n", err)
-	}
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Printf("ReadAll: %s\n", err)
-	}
-
-	return body
 }

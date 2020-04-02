@@ -3,7 +3,6 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -11,11 +10,6 @@ import (
 	fb "github.com/huandu/facebook"
 	"golang.org/x/oauth2"
 )
-
-type FBUser struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
 
 func GetFacebookClientID() string {
 	return facebookClient.ClientID
@@ -44,38 +38,19 @@ func FacebookCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	session := facebookClient.GlobalApp.Session(token.AccessToken)
 
-	res, err := session.Get("/me", fb.Params{
-		"fields": "id,first_name,last_name",
-	})
+	fields := "id,email,first_name,last_name"
 
+	response, err := session.Get("/me", fb.Params{
+		"fields": fields,
+	})
 	if err != nil {
 		fmt.Printf("FB Client error: %s\n", err)
 	}
 
-	fmt.Println("### Facebook sdk call:", res["id"], res["first_name"])
-
-	getFacebookUserUrl := facebookClient.BASE_API_URL + "/me?access_token=" + url.QueryEscape(token.AccessToken)
-
-	resp, err := http.Get(getFacebookUserUrl)
-	if err != nil {
-		fmt.Printf("Get: %s\n", err)
-	}
-	defer resp.Body.Close()
-
-	response, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("ReadAll: %s\n", err)
-
-	}
+	fmt.Println("Facebook sdk call:", response["id"], response["email"])
 
 	SetAuthorizationCookie(w, token.AccessToken)
 
-	// var data map[string]interface{}
-	var fbUser FBUser
-	if err := json.Unmarshal(response, &fbUser); err != nil {
-		panic(err)
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(response)
+	json.NewEncoder(w).Encode(response)
 }

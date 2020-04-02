@@ -30,7 +30,7 @@ func init() {
 	}
 
 	auth.InitGoogleClient()
-	facebookClient.InitFacebookClient()
+	facebookClient.InitClient()
 	auth.InitInstagramClient()
 	auth.InitSpotifyClient()
 }

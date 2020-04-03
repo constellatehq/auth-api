@@ -15,7 +15,6 @@ func InitRoutes(r *mux.Router) {
 
 func initAuthRoutes(r *mux.Router) *mux.Router {
 	authRouter := r.PathPrefix("/auth").Subrouter()
-	// authRouter.Use(authMiddleware.GenerateAuthMiddleware())
 	authRouter.HandleFunc("/google", auth.GoogleLoginHandler).Methods("GET")
 	authRouter.HandleFunc("/google/callback", auth.GoogleCallbackHandler).Methods("GET")
 	authRouter.HandleFunc("/facebook", auth.FacebookLoginHandler).Methods("GET")

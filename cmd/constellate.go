@@ -42,13 +42,15 @@ func init() {
 func main() {
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},   // All origins
-		AllowedMethods: []string{"GET"}, // Allowing only get, just an example
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowedOrigins:   []string{"http://localhost:3000", "https://constellatehq.com"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTION"},
+		Debug:            true,
 	})
 
 	router := mux.NewRouter()
 	router.Use(loggingMiddleware)
-	router.Use(mux.CORSMethodMiddleware(router))
 	routes.InitRoutes(router)
 	router.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		status := Status{200, "Server is healthy"}

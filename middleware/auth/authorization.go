@@ -25,7 +25,7 @@ func GenerateAuthMiddleware() (mw func(http.Handler) http.Handler) {
 			}
 			fmt.Printf("%+v\n", googleResponse)
 
-			// Validate access token
+			// Facebook SDK's equivalent of token validation
 			facebookResponse, facebookErr := session.Inspect()
 			if facebookErr != nil {
 				fmt.Printf("Error validating Facebook access token: %s\n", facebookErr)

@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
-	"github.com/constellatehq/auth-api/models"
+	"github.com/constellatehq/auth-api/model"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -37,15 +39,29 @@ func InitClient() {
 	}
 }
 
-func Get(url string) (models.Response, error) {
-	response, err := http.Get(BASE_API_URL + url)
+func Api(url string, requestType string, accessToken string) (model.Response, error) {
+	req, err := http.NewRequest(requestType, BASE_API_URL+url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Google Get request failed: %s", err.Error())
+		log.Fatal("Error reading request. ", err)
 	}
 
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	client := &http.Client{Timeout: time.Second * 10}
+	response, err := client.Do(req)
+
+	body, err := responseToObject(response)
+
+	if response.StatusCode != 200 {
+		return body, fmt.Errorf("%s", response.Status)
+	}
+
+	return body, err
+}
+
+func responseToObject(response *http.Response) (model.Response, error) {
 	defer response.Body.Close()
 	buf := &bytes.Buffer{}
-	_, err = io.Copy(buf, response.Body)
+	_, err := io.Copy(buf, response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Failed reading response body: %s", err.Error())
 	}
@@ -53,8 +69,23 @@ func Get(url string) (models.Response, error) {
 	return makeResponse(buf.Bytes())
 }
 
-func makeResponse(response []byte) (models.Response, error) {
-	var res models.Response
+func Get(url string) (model.Response, error) {
+	response, err := http.Get(BASE_API_URL + url)
+	if err != nil {
+		return nil, fmt.Errorf("Google Get request failed: %s", err.Error())
+	}
+
+	body, err := responseToObject(response)
+
+	if response.StatusCode != 200 {
+		return body, fmt.Errorf("%s", response.Status)
+	}
+
+	return body, err
+}
+
+func makeResponse(response []byte) (model.Response, error) {
+	var res model.Response
 	err := json.Unmarshal(response, &res)
 	if err != nil {
 		return nil, fmt.Errorf("Failed converting response to object: %s", err.Error())

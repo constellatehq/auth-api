@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/constellatehq/auth-api/models"
+	"github.com/constellatehq/auth-api/model"
 	googleClient "github.com/constellatehq/auth-api/server/google_client"
 	"golang.org/x/oauth2"
 )
@@ -20,7 +20,7 @@ func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	response, err := getGoogleUserInfo(r.FormValue("state"), r.FormValue("code"))
 	if err != nil {
-		fmt.Println(err.Error())
+		model.CreateErrorResponse(w, http.StatusUnauthorized, "Unauthorized", err.Error(), nil)
 		return
 	}
 
@@ -28,14 +28,14 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func getGoogleUserInfo(state string, code string) (models.Response, error) {
+func getGoogleUserInfo(state string, code string) (model.Response, error) {
 	if state != oauthStateString {
-		return nil, fmt.Errorf("invalid oauth state")
+		return nil, fmt.Errorf("Invalid oauth state")
 	}
 
 	token, err := googleClient.OauthConfig.Exchange(oauth2.NoContext, code)
 	if err != nil {
-		return nil, fmt.Errorf("code exchange failed: %s", err.Error())
+		return nil, fmt.Errorf("Code exchange failed: %s", err.Error())
 	}
 
 	response, err := googleClient.Get("/v2/userinfo?access_token=" + token.AccessToken)

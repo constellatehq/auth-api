@@ -5,25 +5,11 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/constellatehq/auth-api/model"
 	facebookClient "github.com/constellatehq/auth-api/server/facebook_client"
+	googleClient "github.com/constellatehq/auth-api/server/google_client"
 	"github.com/gorilla/context"
 )
-
-var (
-	facebookVerificationUrl = ""
-)
-
-type FacebookAppTokenResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-}
-
-func middleware1(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("middleware1")
-		next.ServeHTTP(w, r)
-	})
-}
 
 func GenerateAuthMiddleware() (mw func(http.Handler) http.Handler) {
 	mw = func(next http.Handler) http.Handler {
@@ -33,20 +19,39 @@ func GenerateAuthMiddleware() (mw func(http.Handler) http.Handler) {
 			tokenType, accessToken := splitToken(accessToken)
 
 			session := facebookClient.GlobalApp.Session(accessToken)
+			googleResponse, googleErr := validateGoogleToken(accessToken)
+			if googleErr != nil {
+				fmt.Printf("%s\n", googleErr)
+			}
+			fmt.Printf("%+v\n", googleResponse)
 
 			// Validate access token
-			result, err := session.Inspect()
-			if err != nil {
-				fmt.Printf("Error validating Facebook access token: %s\n", err)
+			facebookResponse, facebookErr := session.Inspect()
+			if facebookErr != nil {
+				fmt.Printf("Error validating Facebook access token: %s\n", facebookErr)
 			}
 
-			fmt.Printf("%+v\n", result)
+			if googleErr != nil && facebookErr != nil {
+				model.CreateErrorResponse(w, http.StatusUnauthorized, "Unauthorized", "Invalid access token", nil)
+				return
+			}
+
+			fmt.Printf("%+v\n", facebookResponse)
 			// Get user off id and set user/access token
 			context.Set(r, "accessToken", tokenType+" "+accessToken)
 			next.ServeHTTP(w, r)
 		})
 	}
 	return
+}
+
+func validateGoogleToken(accessToken string) (model.Response, error) {
+	response, err := googleClient.Api("/v3/userinfo", "GET", accessToken)
+	if err != nil {
+		return nil, fmt.Errorf("Error validating Google access token: %s\n", err)
+	}
+
+	return response, nil
 }
 
 func splitToken(accessToken string) (string, string) {

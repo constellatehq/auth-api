@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/constellatehq/auth-api/model"
-	facebookClient "github.com/constellatehq/auth-api/server/facebook_client"
-	googleClient "github.com/constellatehq/auth-api/server/google_client"
+	facebookClient "github.com/constellatehq/auth-api/server/clients/facebook_client"
+	googleClient "github.com/constellatehq/auth-api/server/clients/google_client"
 	"github.com/gorilla/context"
 )
 

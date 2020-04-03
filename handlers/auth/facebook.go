@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	facebookClient "github.com/constellatehq/auth-api/server/facebook_client"
+	"github.com/constellatehq/auth-api/model"
+	facebookClient "github.com/constellatehq/auth-api/server/clients/facebook_client"
 	fb "github.com/huandu/facebook"
 	"golang.org/x/oauth2"
 )
@@ -25,26 +26,29 @@ func FacebookLoginHandler(w http.ResponseWriter, r *http.Request) {
 func FacebookCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	state := r.FormValue("state")
 	if state != oauthStateString {
-		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
+		model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "Invalid OAuth state", nil)
+		return
 	}
 
 	code := r.FormValue("code")
 
 	token, err := facebookClient.OauthConfig.Exchange(oauth2.NoContext, code)
 	if err != nil {
-		fmt.Printf("oauthConf.Exchange() failed with '%s'\n", err)
+		model.CreateErrorResponse(w, http.StatusBadRequest, "Bad Request", err.Error(), nil)
+		return
 	}
 	fmt.Println("FB Access Token:", url.QueryEscape(token.AccessToken))
 
 	session := facebookClient.GlobalApp.Session(token.AccessToken)
 
-	fields := "id,email,first_name,last_name"
+	fields := "id,first_name,last_name,email,gender,age_range,birthday"
 
 	response, err := session.Get("/me", fb.Params{
 		"fields": fields,
 	})
 	if err != nil {
-		fmt.Printf("FB Client error: %s\n", err)
+		model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "FB Client error: "+err.Error(), nil)
+		return
 	}
 
 	fmt.Println("Facebook sdk call:", response["id"], response["email"])

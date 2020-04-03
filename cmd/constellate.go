@@ -12,8 +12,9 @@ import (
 
 	"github.com/constellatehq/auth-api/handlers/auth"
 	"github.com/constellatehq/auth-api/routes"
-	facebookClient "github.com/constellatehq/auth-api/server/facebook_client"
-	googleClient "github.com/constellatehq/auth-api/server/google_client"
+	facebookClient "github.com/constellatehq/auth-api/server/clients/facebook_client"
+	googleClient "github.com/constellatehq/auth-api/server/clients/google_client"
+	"github.com/constellatehq/auth-api/utilities"
 )
 
 type Status struct {
@@ -29,6 +30,8 @@ func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Print("No .env file found")
 	}
+
+	utilities.InitEnv()
 
 	googleClient.InitClient()
 	facebookClient.InitClient()

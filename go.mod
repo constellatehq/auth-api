@@ -8,9 +8,11 @@ require (
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
 	github.com/huandu/facebook v2.3.1+incompatible
+	github.com/jmoiron/sqlx v1.2.0
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
+	github.com/lib/pq v1.0.0
 	github.com/rs/cors v1.7.0
 	github.com/urfave/negroni v1.0.0
 	github.com/valyala/fasttemplate v1.1.0 // indirect

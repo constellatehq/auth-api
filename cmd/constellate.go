@@ -2,19 +2,22 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 
+	"github.com/constellatehq/auth-api/config"
 	"github.com/constellatehq/auth-api/handlers/auth"
 	"github.com/constellatehq/auth-api/routes"
-	facebookClient "github.com/constellatehq/auth-api/server/clients/facebook_client"
-	googleClient "github.com/constellatehq/auth-api/server/clients/google_client"
-	"github.com/constellatehq/auth-api/utilities"
+	facebookClient "github.com/constellatehq/auth-api/server/clients/facebook"
+	googleClient "github.com/constellatehq/auth-api/server/clients/google"
 )
 
 type Status struct {
@@ -23,7 +26,7 @@ type Status struct {
 }
 
 var (
-	port = "127.0.0.1:8000"
+	appPort = "127.0.0.1:8000"
 )
 
 func init() {
@@ -31,7 +34,7 @@ func init() {
 		log.Print("No .env file found")
 	}
 
-	utilities.InitEnv()
+	config.InitEnv()
 
 	googleClient.InitClient()
 	facebookClient.InitClient()
@@ -39,7 +42,27 @@ func init() {
 	auth.InitSpotifyClient()
 }
 
+func initDb() (*sqlx.DB, error) {
+
+	postgresAddr := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		config.DBHost, config.DBPort, config.DBUser, config.DBPassword, config.DBName)
+
+	db, err := sqlx.Connect("postgres", postgresAddr)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// exec the schema or fail; multi-statement Exec behavior varies between
+	// database drivers;  pq will exec them all, sqlite3 won't, ymmv
+	// db.MustExec(schema)
+
+	return db, nil
+}
+
 func main() {
+
+	initDb()
 
 	cors := cors.New(cors.Options{
 		AllowCredentials: true,
@@ -62,12 +85,12 @@ func main() {
 
 	srv := &http.Server{
 		Handler: handler,
-		Addr:    port,
+		Addr:    appPort,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	log.Println("Listening on port:", port)
+	log.Println("Listening on port:", appPort)
 	log.Fatal(srv.ListenAndServeTLS("https-server.crt", "https-server.key"))
 
 }

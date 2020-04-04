@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/constellatehq/auth-api/utilities"
+	"github.com/constellatehq/auth-api/config"
 )
 
 type RedirectUrlResponse = struct {
@@ -22,7 +22,7 @@ func SetAuthorizationCookie(w http.ResponseWriter, accessToken string) {
 	cookie := http.Cookie{
 		Name:    "ConstellateAccessToken",
 		Value:   "Bearer " + accessToken,
-		Domain:  utilities.ConstellateDomain,
+		Domain:  config.ConstellateDomain,
 		Expires: expiration,
 	}
 	http.SetCookie(w, &cookie)

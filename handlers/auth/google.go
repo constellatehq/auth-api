@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/constellatehq/auth-api/model"
-	googleClient "github.com/constellatehq/auth-api/server/clients/google_client"
+	googleClient "github.com/constellatehq/auth-api/server/clients/google"
 	"golang.org/x/oauth2"
 )
 

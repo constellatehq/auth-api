@@ -2,18 +2,17 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 
 	"github.com/constellatehq/auth-api/config"
+	"github.com/constellatehq/auth-api/driver"
 	"github.com/constellatehq/auth-api/handlers/auth"
 	"github.com/constellatehq/auth-api/routes"
 	facebookClient "github.com/constellatehq/auth-api/server/clients/facebook"
@@ -25,8 +24,8 @@ type Status struct {
 	Message string `json:"message"`
 }
 
-var (
-	appPort = "127.0.0.1:8000"
+const (
+	APP_PORT = "127.0.0.1:8000"
 )
 
 func init() {
@@ -42,27 +41,9 @@ func init() {
 	auth.InitSpotifyClient()
 }
 
-func initDb() (*sqlx.DB, error) {
-
-	postgresAddr := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		config.DBHost, config.DBPort, config.DBUser, config.DBPassword, config.DBName)
-
-	db, err := sqlx.Connect("postgres", postgresAddr)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	// exec the schema or fail; multi-statement Exec behavior varies between
-	// database drivers;  pq will exec them all, sqlite3 won't, ymmv
-	// db.MustExec(schema)
-
-	return db, nil
-}
-
 func main() {
 
-	initDb()
+	driver.InitDb()
 
 	cors := cors.New(cors.Options{
 		AllowCredentials: true,
@@ -85,12 +66,12 @@ func main() {
 
 	srv := &http.Server{
 		Handler: handler,
-		Addr:    appPort,
+		Addr:    APP_PORT,
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	log.Println("Listening on port:", appPort)
+	log.Println("Listening on port:", APP_PORT)
 	log.Fatal(srv.ListenAndServeTLS("https-server.crt", "https-server.key"))
 
 }

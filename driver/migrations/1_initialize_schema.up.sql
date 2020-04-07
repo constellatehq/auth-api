@@ -1,5 +1,11 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE TYPE gender AS ENUM (
+    'male',
+    'female',
+    'other'
+);
+
 CREATE TYPE room_type AS ENUM (
     'master',
     'flex',
@@ -33,11 +39,11 @@ CREATE TABLE IF NOT EXISTS users (
     last_name varchar(255) NOT NULL,
     email varchar(255) NOT NULL,
     birthday date,
-    gender varchar(255),
+    gender gender,
     onboarded boolean,
     permission_level smallint,
-    created_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
-    -- updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS user_preferences (
@@ -50,13 +56,15 @@ CREATE TABLE IF NOT EXISTS user_preferences (
     job_type varchar(255),
     job_title varchar(255),
     created_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    -- updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES public.USERS (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS user_roommate_preferences (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
     user_id uuid,
+    created_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES public.USERS (id) ON DELETE CASCADE
 );
 

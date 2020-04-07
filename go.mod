@@ -10,6 +10,7 @@ require (
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
 	github.com/huandu/facebook v2.3.1+incompatible
+	github.com/huandu/go-sqlbuilder v1.7.0
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jinzhu/gorm v1.9.12
 	github.com/jmoiron/sqlx v1.2.0

@@ -49,7 +49,7 @@ func Api(url string, requestType string, accessToken string) (model.Response, er
 	client := &http.Client{Timeout: time.Second * 10}
 	response, err := client.Do(req)
 
-	body, err := responseToObject(response)
+	body, err := ResponseToObject(response)
 
 	if response.StatusCode != 200 {
 		return body, fmt.Errorf("%s", response.Status)
@@ -58,7 +58,7 @@ func Api(url string, requestType string, accessToken string) (model.Response, er
 	return body, err
 }
 
-func responseToObject(response *http.Response) (model.Response, error) {
+func ResponseToObject(response *http.Response) (model.Response, error) {
 	defer response.Body.Close()
 	buf := &bytes.Buffer{}
 	_, err := io.Copy(buf, response.Body)
@@ -75,7 +75,7 @@ func Get(url string) (model.Response, error) {
 		return nil, fmt.Errorf("Google Get request failed: %s", err.Error())
 	}
 
-	body, err := responseToObject(response)
+	body, err := ResponseToObject(response)
 
 	if response.StatusCode != 200 {
 		return body, fmt.Errorf("%s", response.Status)
@@ -92,5 +92,4 @@ func makeResponse(response []byte) (model.Response, error) {
 	}
 
 	return res, nil
-
 }

@@ -15,6 +15,7 @@ type User struct {
 	Email           string    `db:"email" json:"email"`
 	Birthday        time.Time `db:"birthday" json:"birthday"`
 	Gender          string    `db:"gender" json:"gender"` // Enum - Male, Female, Other
+	Onboarded       bool      `db:"onboarded" json:"onboarded"`
 	PermissionLevel int64     `db:"permission_level" json:"permission_level"`
 	CreatedAt       time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt       time.Time `db:"updated_at" json:"updated_at"`
@@ -43,7 +44,7 @@ type UserPreferences struct {
 type UserRoommatePreferences struct {
 	Id                   string `db:"id" json:"id"`
 	UserId               string `db:"user_id" json:"user_id"`
-	RoommateRelationship string `db:"roommate_relationship" json:"roommate_relationship"` // Enum -
+	RoommateRelationship string `db:"roommate_relationship" json:"roommate_relationship"` // Enum - coexistence, friendship, mutual
 	RoommateAmount       string `db:"roommate_amount" json:"roommate_amount"`
 	Gender               string `db:"gender" json:"gender"`
 	Age                  string `db:"age" json:"age"`

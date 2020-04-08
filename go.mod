@@ -20,6 +20,7 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/cors v1.7.0
+	github.com/satori/go.uuid v1.2.0
 	github.com/urfave/negroni v1.0.0
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	golang.org/x/crypto v0.0.0-20200320181102-891825fb96df // indirect

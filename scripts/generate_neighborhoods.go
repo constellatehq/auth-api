@@ -32,7 +32,8 @@ type NeighborhoodResponseObject struct {
 }
 
 func main() {
-	addNeighborhoodsToDB()
+	// addNeighborhoodsToDB()
+
 }
 
 func getNeighborhoods() ([]NeighborhoodResponseObject, error) {

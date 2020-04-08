@@ -10,8 +10,14 @@ import (
 	"golang.org/x/oauth2"
 )
 
+var (
+	oauthState = ""
+)
+
 func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
-	url := googleClient.OauthConfig.AuthCodeURL(oauthStateString)
+	oauthState = r.FormValue("state")
+	fmt.Printf("State: %s\n", oauthState)
+	url := googleClient.OauthConfig.AuthCodeURL(oauthState)
 
 	redirectUrl := RedirectUrlResponse{url}
 	json.NewEncoder(w).Encode(redirectUrl)
@@ -21,7 +27,7 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	state := r.FormValue("state")
 	code := r.FormValue("code")
 
-	if state != oauthStateString {
+	if state != oauthState {
 		model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "Invalid OAuth state", nil)
 		return
 	}
@@ -38,9 +44,13 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	SetAuthorizationCookie(w, token.AccessToken)
-	json.NewEncoder(w).Encode(response)
+	SetOauthStateCookie(w, state)
+	// w.Header().Set("Content-Type", "application/json")
+
+	fmt.Printf("%s", response)
+	// json.NewEncoder(w).Encode(response)
+	http.Redirect(w, r, "http://localhost:3000/oauth/callback", 302)
 }
 
 func getGoogleUserInfo(accessToken string) (model.Response, error) {

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/constellatehq/auth-api/config"
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -17,13 +18,10 @@ func InitDb() (*sqlx.DB, error) {
 		log.Fatalln(err)
 	}
 
-	// postgresUrl := BuildPostgresUrl(config.DBUser, config.DBPassword, config.DBHost, config.DBPort, config.DBName)
-
-	// Migrate(postgresUrl)
-
-	// exec the schema or fail; multi-statement Exec behavior varies between
-	// database drivers;  pq will exec them all, sqlite3 won't, ymmv
-	// db.MustExec(schema)
+	// facebookId := "1234"
+	// gender := model.Gender(1)
+	// user := model.User{GoogleId: &facebookId, FirstName: "Joey", LastName: "Blumpkin", Gender: gender.String()}
+	// repository.CreateUser(db, user)
 
 	return db, nil
 }

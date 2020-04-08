@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -16,14 +17,30 @@ var (
 	oauthStateString = "pseudo-random"
 )
 
+func SetOauthStateCookie(w http.ResponseWriter, state string) {
+	expiration := time.Now().Add(25 * time.Minute)
+
+	cookie := http.Cookie{
+		Name:     "OauthState",
+		Value:    state,
+		Domain:   config.ConstellateDomain,
+		Expires:  expiration,
+		HttpOnly: false,
+		Path:     "/",
+	}
+	http.SetCookie(w, &cookie)
+}
+
 func SetAuthorizationCookie(w http.ResponseWriter, accessToken string) {
 	expiration := time.Now().Add(365 * 24 * time.Hour)
 
 	cookie := http.Cookie{
-		Name:    "ConstellateAccessToken",
-		Value:   "Bearer " + accessToken,
-		Domain:  config.ConstellateDomain,
-		Expires: expiration,
+		Name:     "ConstellateAccessToken",
+		Value:    fmt.Sprintf("Bearer %s", accessToken),
+		Domain:   config.ConstellateDomain,
+		Expires:  expiration,
+		HttpOnly: false,
+		Path:     "/",
 	}
 	http.SetCookie(w, &cookie)
 }

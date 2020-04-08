@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS user_preferences (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
     user_id uuid,
-    budget FLOAT,
-    move_in date,
-    duration varchar(255),
+    budget FLOAT NOT NULL,
+    move_in date NOT NULL,
+    duration varchar(255) NOT NULL,
     room_type varchar(255),
     job_type varchar(255),
     job_title varchar(255),

@@ -6,14 +6,15 @@ import (
 	"github.com/constellatehq/auth-api/handlers/auth"
 	"github.com/constellatehq/auth-api/handlers/user"
 	authMiddleware "github.com/constellatehq/auth-api/middleware/auth"
+	"github.com/constellatehq/auth-api/model"
 )
 
-func InitRoutes(r *mux.Router) {
-	initAuthRoutes(r)
-	initUserRoutes(r)
+func InitRoutes(r *mux.Router, env model.Env) {
+	initAuthRoutes(r, env)
+	initUserRoutes(r, env)
 }
 
-func initAuthRoutes(r *mux.Router) *mux.Router {
+func initAuthRoutes(r *mux.Router, env model.Env) *mux.Router {
 	authRouter := r.PathPrefix("/auth").Subrouter()
 	authRouter.HandleFunc("/google", auth.GoogleLoginHandler).Methods("GET")
 	authRouter.HandleFunc("/google/callback", auth.GoogleCallbackHandler).Methods("GET")
@@ -27,10 +28,10 @@ func initAuthRoutes(r *mux.Router) *mux.Router {
 	return authRouter
 }
 
-func initUserRoutes(r *mux.Router) *mux.Router {
+func initUserRoutes(r *mux.Router, env model.Env) *mux.Router {
 	userRouter := r.PathPrefix("/user").Subrouter()
 	userRouter.Use(authMiddleware.GenerateAuthMiddleware())
-	userRouter.HandleFunc("/profile", user.UserProfileHandler).Methods("GET")
+	userRouter.Handle("/profile/{id:[0-9]+}", model.Handler{Env: &env, H: user.UserProfileHandler}).Methods("GET")
 
 	return userRouter
 }

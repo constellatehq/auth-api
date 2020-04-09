@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/constellatehq/auth-api/config"
 	"github.com/constellatehq/auth-api/model"
 	facebookClient "github.com/constellatehq/auth-api/server/clients/facebook"
 	fb "github.com/huandu/facebook"
@@ -54,6 +55,7 @@ func FacebookCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Facebook sdk call:", response["id"], response["email"])
 
 	SetAuthorizationCookie(w, token.AccessToken)
+	SetOauthStateCookie(w, state)
 
-	json.NewEncoder(w).Encode(response)
+	http.Redirect(w, r, config.OauthRedirectUrl, 302)
 }

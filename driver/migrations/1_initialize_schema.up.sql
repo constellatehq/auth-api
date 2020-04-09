@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS users (
     gender gender,
     onboarded boolean,
     permission_level smallint,
+    email_verified boolean,
     created_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS user_preferences (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
     user_id uuid,
-    budget FLOAT NOT NULL,
+    budget float NOT NULL,
     move_in date NOT NULL,
     duration varchar(255) NOT NULL,
     room_type varchar(255),
@@ -101,8 +102,8 @@ CREATE TABLE IF NOT EXISTS neighborhoods (
     state varchar(255),
     city varchar(255),
     district varchar(255),
-    latitude FLOAT,
-    longitude FLOAT,
+    latitude float,
+    longitude float,
     zip_code varchar(6)
 );
 

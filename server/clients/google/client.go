@@ -34,12 +34,12 @@ func InitClient() {
 		RedirectURL:  OAUTH_REDIRECT_URL,
 		ClientID:     ClientID,
 		ClientSecret: ClientSecret,
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 		Endpoint:     google.Endpoint,
 	}
 }
 
-func Api(url string, requestType string, accessToken string) (model.Response, error) {
+func Api(url string, requestType string, accessToken string) ([]byte, error) {
 	req, err := http.NewRequest(requestType, BASE_API_URL+url, nil)
 	if err != nil {
 		log.Fatal("Error reading request. ", err)
@@ -49,33 +49,32 @@ func Api(url string, requestType string, accessToken string) (model.Response, er
 	client := &http.Client{Timeout: time.Second * 10}
 	response, err := client.Do(req)
 
-	body, err := ResponseToObject(response)
+	body, err := ResponseToBytes(response)
 
 	if response.StatusCode != 200 {
 		return body, fmt.Errorf("%s", response.Status)
 	}
 
-	return body, err
+	return body, nil
 }
 
-func ResponseToObject(response *http.Response) (model.Response, error) {
+func ResponseToBytes(response *http.Response) ([]byte, error) {
 	defer response.Body.Close()
 	buf := &bytes.Buffer{}
 	_, err := io.Copy(buf, response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Failed reading response body: %s", err.Error())
 	}
-
-	return makeResponse(buf.Bytes())
+	return buf.Bytes(), nil
 }
 
-func Get(url string) (model.Response, error) {
+func Get(url string) ([]byte, error) {
 	response, err := http.Get(BASE_API_URL + url)
 	if err != nil {
 		return nil, fmt.Errorf("Google Get request failed: %s", err.Error())
 	}
 
-	body, err := ResponseToObject(response)
+	body, err := ResponseToBytes(response)
 
 	if response.StatusCode != 200 {
 		return body, fmt.Errorf("%s", response.Status)

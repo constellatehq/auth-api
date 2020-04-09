@@ -3,6 +3,8 @@ package model
 import (
 	"fmt"
 	"time"
+
+	null "gopkg.in/guregu/null.v3"
 )
 
 type Gender int
@@ -19,20 +21,21 @@ func (g Gender) String() string {
 }
 
 type User struct {
-	Id              string     `db:"id" json:"id"`
-	FacebookId      *string    `db:"facebook_id" json:"facebook_id,omitempty"`
-	GoogleId        *string    `db:"google_id" json:"google_id,omitempty"`
-	InstagramId     *string    `db:"instagram_id" json:"instagram_id,omitempty"`
-	SpotifyId       *string    `db:"spotify_id" json:"spotify_id,omitempty"`
-	FirstName       string     `db:"first_name" json:"first_name"`
-	LastName        string     `db:"last_name" json:"last_name"`
-	Email           string     `db:"email" json:"email"`
-	Birthday        *time.Time `db:"birthday" json:"birthday,omitempty"`
-	Gender          string     `db:"gender" json:"gender,omitempty"` // Enum - Male, Female, Other
-	Onboarded       bool       `db:"onboarded" json:"onboarded"`
-	PermissionLevel int64      `db:"permission_level" json:"permission_level"`
-	CreatedAt       *time.Time `db:"created_at" json:"created_at,omitempty"`
-	UpdatedAt       *time.Time `db:"updated_at" json:"updated_at,omitempty"`
+	Id              string      `db:"id" json:"id"`
+	FacebookId      null.String `db:"facebook_id" json:"facebook_id,omitempty"`
+	GoogleId        null.String `db:"google_id" json:"google_id,omitempty"`
+	InstagramId     null.String `db:"instagram_id" json:"instagram_id,omitempty"`
+	SpotifyId       null.String `db:"spotify_id" json:"spotify_id,omitempty"`
+	FirstName       string      `db:"first_name" json:"first_name"`
+	LastName        string      `db:"last_name" json:"last_name"`
+	Email           string      `db:"email" json:"email"`
+	Birthday        null.Time   `db:"birthday" json:"birthday,omitempty"`
+	Gender          null.String `db:"gender" json:"gender,omitempty"` // Enum Gender
+	Onboarded       bool        `db:"onboarded" json:"onboarded"`
+	PermissionLevel int64       `db:"permission_level" json:"permission_level"`
+	EmailVerified   bool        `db:"email_verified" json:"email_verified"`
+	CreatedAt       null.Time   `db:"created_at" json:"created_at,omitempty"`
+	UpdatedAt       null.Time   `db:"updated_at" json:"updated_at,omitempty"`
 }
 
 // Relation types

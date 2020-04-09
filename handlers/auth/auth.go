@@ -17,30 +17,29 @@ var (
 	oauthStateString = "pseudo-random"
 )
 
-func SetOauthStateCookie(w http.ResponseWriter, state string) {
-	expiration := time.Now().Add(25 * time.Minute)
-
+func CreateClientCookie(name string, value string, expiration time.Time) http.Cookie {
 	cookie := http.Cookie{
-		Name:     "OauthState",
-		Value:    state,
+		Name:     name,
+		Value:    value,
 		Domain:   config.ConstellateDomain,
 		Expires:  expiration,
 		HttpOnly: false,
 		Path:     "/",
 	}
+
+	return cookie
+}
+
+func SetOauthStateCookie(w http.ResponseWriter, state string) {
+	expiration := time.Now().Add(25 * time.Minute)
+	cookie := CreateClientCookie("OauthState", state, expiration)
+
 	http.SetCookie(w, &cookie)
 }
 
 func SetAuthorizationCookie(w http.ResponseWriter, accessToken string) {
 	expiration := time.Now().Add(365 * 24 * time.Hour)
+	cookie := CreateClientCookie("ConstellateAccessToken", fmt.Sprintf("Bearer %s", accessToken), expiration)
 
-	cookie := http.Cookie{
-		Name:     "ConstellateAccessToken",
-		Value:    fmt.Sprintf("Bearer %s", accessToken),
-		Domain:   config.ConstellateDomain,
-		Expires:  expiration,
-		HttpOnly: false,
-		Path:     "/",
-	}
 	http.SetCookie(w, &cookie)
 }

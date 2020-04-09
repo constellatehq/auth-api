@@ -1,13 +1,20 @@
 package auth
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/constellatehq/auth-api/config"
 	"github.com/constellatehq/auth-api/model"
+	"github.com/constellatehq/auth-api/model/errors"
+	"github.com/constellatehq/auth-api/model/schema"
+	"github.com/constellatehq/auth-api/repository"
 	googleClient "github.com/constellatehq/auth-api/server/clients/google"
+	"github.com/jmoiron/sqlx"
 	"golang.org/x/oauth2"
+	null "gopkg.in/guregu/null.v3"
 )
 
 var (
@@ -20,10 +27,11 @@ func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 	url := googleClient.OauthConfig.AuthCodeURL(oauthState)
 
 	redirectUrl := RedirectUrlResponse{url}
+
 	json.NewEncoder(w).Encode(redirectUrl)
 }
 
-func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
+func GoogleCallbackHandler(env *model.Env, w http.ResponseWriter, r *http.Request) {
 	state := r.FormValue("state")
 	code := r.FormValue("code")
 
@@ -34,26 +42,34 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := googleClient.OauthConfig.Exchange(oauth2.NoContext, code)
 	if err != nil {
+		fmt.Printf("+%v\n", token)
 		model.CreateErrorResponse(w, http.StatusBadRequest, "Bad Request", err.Error(), nil)
 		return
 	}
 
-	response, err := getGoogleUserInfo(token.AccessToken)
-	if err != nil {
+	fmt.Printf("Redir url: %s\n", config.OauthRedirectUrl)
+	fmt.Printf("Google Access Token: %s\n", token.AccessToken)
+
+	response, err := getGoogleUserInfo(env.Db, token.AccessToken)
+	switch err {
+	case nil:
+
+	case errors.UserExistsError:
+
+	default:
 		model.CreateErrorResponse(w, http.StatusUnauthorized, "Unauthorized", err.Error(), nil)
 		return
 	}
 
 	SetAuthorizationCookie(w, token.AccessToken)
 	SetOauthStateCookie(w, state)
-	// w.Header().Set("Content-Type", "application/json")
 
-	fmt.Printf("%s", response)
-	// json.NewEncoder(w).Encode(response)
+	fmt.Printf("+%v\n", response)
+
 	http.Redirect(w, r, "http://localhost:3000/oauth/callback", 302)
 }
 
-func getGoogleUserInfo(accessToken string) (model.Response, error) {
+func getGoogleUserInfo(db *sqlx.DB, accessToken string) (*schema.GoogleUserInfoResponse, error) {
 
 	response, err := googleClient.Get("/v2/userinfo?access_token=" + accessToken)
 
@@ -61,5 +77,26 @@ func getGoogleUserInfo(accessToken string) (model.Response, error) {
 		return nil, fmt.Errorf("Failed getting user info: %s", err.Error())
 	}
 
-	return response, nil
+	userInfoResponse := schema.GoogleUserInfoResponse{}
+
+	err = json.Unmarshal(response, &userInfoResponse)
+	if err != nil {
+		return nil, fmt.Errorf("Error unmarshaling Google token response: %s\n", err)
+	}
+
+	var user model.User
+	user.GoogleId = null.String{sql.NullString{String: userInfoResponse.Id, Valid: true}}
+	user.FirstName = userInfoResponse.GivenName
+	user.LastName = userInfoResponse.FamilyName
+	user.Email = userInfoResponse.Email
+
+	fmt.Printf("User: %v\n", user)
+
+	_, err = repository.CreateUserIfNotExists(db, "email", userInfoResponse.Email, user)
+
+	if err != nil {
+		return &userInfoResponse, err
+	}
+
+	return &userInfoResponse, nil
 }

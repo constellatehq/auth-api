@@ -56,7 +56,7 @@ func main() {
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowedOrigins:   []string{"http://127.0.0.1:3000", "http://localhost:3000", "https://constellatehq.com"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTION"},
-		// Debug:            true,	Uncomment if we want to debug request headers
+		Debug:            true, // Uncomment if we want to debug request headers
 	})
 
 	env := model.Env{Db: db}

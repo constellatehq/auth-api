@@ -7,6 +7,7 @@ import (
 
 	"github.com/constellatehq/auth-api/model"
 	"github.com/constellatehq/auth-api/repository"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 )
 
@@ -29,5 +30,11 @@ func UserProfileHandler(env *model.Env, w http.ResponseWriter, r *http.Request) 
 }
 
 func UserMeHandler(env *model.Env, w http.ResponseWriter, r *http.Request) {
+	user, ok := context.GetOk(r, "user")
+	if !ok {
+		model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "Could not get user for provided authorization", nil)
+		return
+	}
 
+	json.NewEncoder(w).Encode(user)
 }

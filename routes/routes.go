@@ -19,7 +19,7 @@ func initAuthRoutes(r *mux.Router, env model.Env) *mux.Router {
 	authRouter.HandleFunc("/google", auth.GoogleLoginHandler).Methods("GET")
 	authRouter.Handle("/google/callback", model.Handler{Env: &env, H: auth.GoogleCallbackHandler}).Methods("GET")
 	authRouter.HandleFunc("/facebook", auth.FacebookLoginHandler).Methods("GET")
-	authRouter.HandleFunc("/facebook/callback", auth.FacebookCallbackHandler).Methods("GET")
+	authRouter.Handle("/facebook/callback", model.Handler{Env: &env, H: auth.FacebookCallbackHandler}).Methods("GET")
 	authRouter.HandleFunc("/instagram", auth.InstagramLoginHandler).Methods("GET")
 	authRouter.HandleFunc("/instagram/callback", auth.InstagramCallbackHandler).Methods("GET")
 	authRouter.HandleFunc("/spotify", auth.SpotifyLoginHandler).Methods("GET")

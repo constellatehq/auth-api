@@ -1,5 +1,7 @@
 package schema
 
+import "time"
+
 type FacebookTokenValidationResponse struct {
 	AppId               string   `json:"app_id"`
 	Application         string   `json:"application"`
@@ -10,4 +12,13 @@ type FacebookTokenValidationResponse struct {
 	Scopes              []string `json:"scopes"`
 	Type                string   `json:"type"`
 	UserId              string   `json:"user_id"`
+}
+
+type FacebookUserInfoResponse struct {
+	Id        string    `json:"id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	Birthday  time.Time `json:"birthday"`
+	Gender    string    `json:"gender"`
 }

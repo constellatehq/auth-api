@@ -1,16 +1,23 @@
 package auth
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/constellatehq/auth-api/config"
 	"github.com/constellatehq/auth-api/model"
+	"github.com/constellatehq/auth-api/model/errors"
+	"github.com/constellatehq/auth-api/model/schema"
+	"github.com/constellatehq/auth-api/repository"
 	facebookClient "github.com/constellatehq/auth-api/server/clients/facebook"
 	fb "github.com/huandu/facebook"
+	"github.com/jmoiron/sqlx"
 	"golang.org/x/oauth2"
+	null "gopkg.in/guregu/null.v3"
 )
 
 func GetFacebookClientID() string {
@@ -18,18 +25,25 @@ func GetFacebookClientID() string {
 }
 
 func FacebookLoginHandler(w http.ResponseWriter, r *http.Request) {
-	url := facebookClient.OauthConfig.AuthCodeURL(oauthStateString)
+	oauthState = r.FormValue("state")
+	fmt.Printf("State: %s\n", oauthState)
+	if oauthState == "" {
+		oauthState = oauthStateString
+	}
+	url := facebookClient.OauthConfig.AuthCodeURL(oauthState)
 
 	redirectUrl := RedirectUrlResponse{url}
 	json.NewEncoder(w).Encode(redirectUrl)
 }
 
-func FacebookCallbackHandler(w http.ResponseWriter, r *http.Request) {
+func FacebookCallbackHandler(env *model.Env, w http.ResponseWriter, r *http.Request) {
+
+	// Check state clientside since we send state as param from client
 	state := r.FormValue("state")
-	if state != oauthStateString {
-		model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "Invalid OAuth state", nil)
-		return
-	}
+	// if state != oauthStateString {
+	// 	model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "Invalid OAuth state", nil)
+	// 	return
+	// }
 
 	code := r.FormValue("code")
 
@@ -40,7 +54,21 @@ func FacebookCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("FB Access Token:", url.QueryEscape(token.AccessToken))
 
-	session := facebookClient.GlobalApp.Session(token.AccessToken)
+	_, err = getFacebookUserInfo(env.Db, token.AccessToken)
+	if err != nil {
+		model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "FB Client error: "+err.Error(), nil)
+		return
+	}
+
+	SetAuthorizationCookie(w, token.AccessToken)
+	SetOauthStateCookie(w, state)
+
+	http.Redirect(w, r, config.OauthRedirectUrl, 302)
+}
+
+func getFacebookUserInfo(db *sqlx.DB, accessToken string) (*schema.FacebookUserInfoResponse, error) {
+
+	session := facebookClient.GlobalApp.Session(accessToken)
 
 	fields := "id,first_name,last_name,email,gender,age_range,birthday"
 
@@ -48,14 +76,42 @@ func FacebookCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		"fields": fields,
 	})
 	if err != nil {
-		model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "FB Client error: "+err.Error(), nil)
-		return
+		return nil, err
 	}
 
-	fmt.Println("Facebook sdk call:", response["id"], response["email"])
+	// Format FB's birthday date response for time type
+	const shortForm = "01/02/2006"
+	response["birthday"], _ = time.Parse(shortForm, response["birthday"].(string))
 
-	SetAuthorizationCookie(w, token.AccessToken)
-	SetOauthStateCookie(w, state)
+	bytes, err := json.Marshal(response)
+	if err != nil {
+		return nil, fmt.Errorf("Error marshaling Facebook user info response: %s\n", err)
+	}
 
-	http.Redirect(w, r, config.OauthRedirectUrl, 302)
+	userInfoResponse := schema.FacebookUserInfoResponse{}
+
+	err = json.Unmarshal(bytes, &userInfoResponse)
+	if err != nil {
+		return nil, fmt.Errorf("Error unmarshaling Facebook user info response: %s\n", err)
+	}
+
+	var user model.User
+	user.FacebookId = null.String{sql.NullString{String: userInfoResponse.Id, Valid: true}}
+	user.FirstName = userInfoResponse.FirstName
+	user.LastName = userInfoResponse.LastName
+	user.Email = userInfoResponse.Email
+	user.Birthday = null.Time{Time: userInfoResponse.Birthday, Valid: true}
+	user.Gender = null.String{sql.NullString{String: userInfoResponse.Gender, Valid: true}}
+
+	_, err = repository.CreateUserIfNotExists(db, "email", userInfoResponse.Email, user)
+	switch err {
+	case nil:
+
+	case errors.UserExistsError:
+
+	default:
+		return &userInfoResponse, err
+	}
+
+	return &userInfoResponse, nil
 }

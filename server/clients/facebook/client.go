@@ -30,7 +30,7 @@ func InitClient() {
 		RedirectURL:  OAUTH_REDIRECT_URL,
 		ClientID:     ClientID,
 		ClientSecret: ClientSecret,
-		Scopes:       []string{"public_profile"},
+		Scopes:       []string{"public_profile", "email", "user_birthday", "user_gender", "user_photos"},
 		Endpoint:     facebook.Endpoint,
 	}
 }

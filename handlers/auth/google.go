@@ -24,6 +24,10 @@ var (
 func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 	oauthState = r.FormValue("state")
 	fmt.Printf("State: %s\n", oauthState)
+	if oauthState == "" {
+		oauthState = oauthStateString
+	}
+
 	url := googleClient.OauthConfig.AuthCodeURL(oauthState)
 
 	redirectUrl := RedirectUrlResponse{url}
@@ -35,10 +39,11 @@ func GoogleCallbackHandler(env *model.Env, w http.ResponseWriter, r *http.Reques
 	state := r.FormValue("state")
 	code := r.FormValue("code")
 
-	if state != oauthState {
-		model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "Invalid OAuth state", nil)
-		return
-	}
+	// Check state clientside since we send state as param from client
+	// if state != oauthState {
+	// 	model.CreateErrorResponse(w, http.StatusInternalServerError, "Internal Server Error", "Invalid OAuth state", nil)
+	// 	return
+	// }
 
 	token, err := googleClient.OauthConfig.Exchange(oauth2.NoContext, code)
 	if err != nil {
@@ -47,7 +52,6 @@ func GoogleCallbackHandler(env *model.Env, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	fmt.Printf("Redir url: %s\n", config.OauthRedirectUrl)
 	fmt.Printf("Google Access Token: %s\n", token.AccessToken)
 
 	response, err := getGoogleUserInfo(env.Db, token.AccessToken)
@@ -66,7 +70,7 @@ func GoogleCallbackHandler(env *model.Env, w http.ResponseWriter, r *http.Reques
 
 	fmt.Printf("+%v\n", response)
 
-	http.Redirect(w, r, "http://localhost:3000/oauth/callback", 302)
+	http.Redirect(w, r, config.OauthRedirectUrl, 302)
 }
 
 func getGoogleUserInfo(db *sqlx.DB, accessToken string) (*schema.GoogleUserInfoResponse, error) {

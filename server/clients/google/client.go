@@ -34,7 +34,7 @@ func InitClient() {
 		RedirectURL:  OAUTH_REDIRECT_URL,
 		ClientID:     ClientID,
 		ClientSecret: ClientSecret,
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/user.birthday.read"},
 		Endpoint:     google.Endpoint,
 	}
 }

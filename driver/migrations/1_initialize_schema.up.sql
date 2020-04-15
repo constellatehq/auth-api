@@ -1,11 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TYPE gender AS ENUM (
-    'male',
-    'female',
-    'other'
-);
-
 CREATE TYPE room_type AS ENUM (
     'master',
     'flex',
@@ -18,19 +12,30 @@ CREATE TYPE job_type AS ENUM (
     'self employed'
 );
 
-CREATE TYPE sleep_wake_schedule AS ENUM (
-    'early bird',
-    'night owl'
-);
-
 CREATE TYPE cleaning_schedule AS ENUM (
     'weekly',
     'bi-monthly',
     'monthly'
 );
 
+CREATE TABLE IF NOT EXISTS gender (
+    id smallint PRIMARY KEY,
+    gender varchar(255) NOT NULL
+);
+
+INSERT INTO gender (id, gender)
+    VALUES (0, ''), (1, 'male'), (2, 'female'), (3, 'other');
+
+CREATE TABLE IF NOT EXISTS sleep_wake_schedule (
+    id smallint PRIMARY KEY,
+    sleep_wake_schedule varchar(255) NOT NULL
+);
+
+INSERT INTO sleep_wake_schedule (id, sleep_wake_schedule)
+    VALUES (0, ''), (1, 'early_bird'), (2, 'night_owl'), (3, 'neither');
+
 CREATE TABLE IF NOT EXISTS users (
-    id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
+    id varchar(255) PRIMARY KEY,
     facebook_id varchar(255),
     google_id varchar(255),
     instagram_id varchar(255),
@@ -39,21 +44,20 @@ CREATE TABLE IF NOT EXISTS users (
     last_name varchar(255) NOT NULL,
     email varchar(255) NOT NULL,
     birthday date,
-    gender gender,
-    onboarded boolean,
-    permission_level smallint,
-    email_verified boolean,
+    gender smallint,
+    onboarded boolean NOT NULL,
+    permission_level smallint NOT NULL,
+    email_verified boolean NOT NULL,
     created_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS user_preferences (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
-    user_id uuid,
+    user_id varchar(255),
     budget float NOT NULL,
     move_in date NOT NULL,
     duration varchar(255) NOT NULL,
-    room_type varchar(255),
     job_type varchar(255),
     job_title varchar(255),
     created_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -63,7 +67,7 @@ CREATE TABLE IF NOT EXISTS user_preferences (
 
 CREATE TABLE IF NOT EXISTS user_roommate_preferences (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
-    user_id uuid,
+    user_id varchar(255),
     created_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp WITH time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES public.USERS (id) ON DELETE CASCADE
@@ -71,7 +75,7 @@ CREATE TABLE IF NOT EXISTS user_roommate_preferences (
 
 CREATE TABLE IF NOT EXISTS user_photos (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
-    user_id uuid,
+    user_id varchar(255),
     instagram_photo_id varchar(255),
     media_type varchar(255),
     media_link varchar(255),
@@ -97,7 +101,7 @@ CREATE TABLE IF NOT EXISTS user_photos (
 -- );
 
 CREATE TABLE IF NOT EXISTS neighborhoods (
-    id uuid PRIMARY KEY DEFAULT uuid_generate_v4 (),
+    id serial PRIMARY KEY,
     country varchar(255),
     state varchar(255),
     city varchar(255),

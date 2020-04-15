@@ -6,7 +6,6 @@ import (
 	"github.com/constellatehq/auth-api/model"
 	gsb "github.com/huandu/go-sqlbuilder"
 	"github.com/jmoiron/sqlx"
-	uuid "github.com/satori/go.uuid"
 )
 
 type NeighborhoodInterface interface {
@@ -22,15 +21,13 @@ type Neighborhood struct {
 	ZipCode   string  `json:"zip_code"`
 }
 
-func CreateNeighborhood(db *sqlx.DB, neighborhood model.Neighborhood) (string, error) {
-
-	id := uuid.NewV4().String()
+func CreateNeighborhood(db *sqlx.DB, neighborhood model.Neighborhood) error {
 
 	ib := gsb.PostgreSQL.NewInsertBuilder()
 
 	ib.InsertInto("neighborhoods")
-	ib.Cols("id", "country", "state", "city", "district", "latitude", "longitude", "zip_code")
-	ib.Values(id, neighborhood.Country, neighborhood.State, neighborhood.City, neighborhood.District, neighborhood.Latitude, neighborhood.Longitude, neighborhood.ZipCode)
+	ib.Cols("country", "state", "city", "district", "latitude", "longitude", "zip_code")
+	ib.Values(neighborhood.Country, neighborhood.State, neighborhood.City, neighborhood.District, neighborhood.Latitude, neighborhood.Longitude, neighborhood.ZipCode)
 
 	// Execute the query.
 	sql, args := ib.Build()
@@ -41,5 +38,5 @@ func CreateNeighborhood(db *sqlx.DB, neighborhood model.Neighborhood) (string, e
 	tx.Commit()
 	// return
 
-	return id, nil
+	return nil
 }

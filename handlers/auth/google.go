@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,7 +13,6 @@ import (
 	googleClient "github.com/constellatehq/auth-api/server/clients/google"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/oauth2"
-	null "gopkg.in/guregu/null.v3"
 )
 
 var (
@@ -89,7 +87,7 @@ func getGoogleUserInfo(db *sqlx.DB, accessToken string) (*schema.GoogleUserInfoR
 	}
 
 	var user model.User
-	user.GoogleId = null.String{sql.NullString{String: userInfoResponse.Id, Valid: true}}
+	user.GoogleId = &userInfoResponse.Id
 	user.FirstName = userInfoResponse.GivenName
 	user.LastName = userInfoResponse.FamilyName
 	user.Email = userInfoResponse.Email

@@ -3,12 +3,13 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	"github.com/constellatehq/auth-api/model"
 	"github.com/constellatehq/auth-api/model/errors"
+	"github.com/constellatehq/auth-api/server/utilities"
 	gsb "github.com/huandu/go-sqlbuilder"
 	"github.com/jmoiron/sqlx"
-	uuid "github.com/satori/go.uuid"
 )
 
 type UserInterface interface {
@@ -18,41 +19,53 @@ type UserInterface interface {
 
 var userStruct = gsb.NewStruct(new(model.User))
 
-type TxFunc func(*sqlx.Tx) error
-
-func Transact(db *sqlx.DB, txFunc TxFunc) (err error) {
-	tx, err := db.Beginx()
-	if err != nil {
-		return
-	}
-	defer func() {
-		if p := recover(); p != nil {
-			tx.Rollback()
-			panic(p) // re-throw panic after Rollback
-		} else if err != nil {
-			tx.Rollback() // err is non-nil; don't change it
-		} else {
-			err = tx.Commit() // err is nil; if Commit returns error update err
-		}
-	}()
-	err = txFunc(tx)
-	return err
-}
-
 func CreateUser(db *sqlx.DB, user model.User) (string, error) {
-	id := uuid.NewV4().String()
+	numId, err := utilities.Sonyflake.NextID()
+	if err != nil {
+		fmt.Printf("Id generation failed\n")
+	}
+	id := strconv.FormatUint(numId, 10)
+	// id := uuid.NewV4().String()
 
 	ib := gsb.PostgreSQL.NewInsertBuilder()
 
 	ib.InsertInto("users")
-	ib.Cols("id", "facebook_id", "google_id", "instagram_id", "spotify_id", "first_name", "last_name", "email", "birthday", "gender", "onboarded", "permission_level")
-	ib.Values(id, user.FacebookId, user.GoogleId, user.InstagramId, user.SpotifyId, user.FirstName, user.LastName, user.Email, user.Birthday, user.Gender, user.Onboarded, user.PermissionLevel)
+	ib.Cols(
+		"id",
+		"facebook_id",
+		"google_id",
+		"instagram_id",
+		"spotify_id",
+		"first_name",
+		"last_name",
+		"email",
+		"birthday",
+		"gender",
+		"onboarded",
+		"permission_level",
+		"email_verified",
+	)
+	ib.Values(
+		id,
+		user.FacebookId,
+		user.GoogleId,
+		user.InstagramId,
+		user.SpotifyId,
+		user.FirstName,
+		user.LastName,
+		user.Email,
+		user.Birthday,
+		user.Gender,
+		user.Onboarded,
+		user.PermissionLevel,
+		user.EmailVerified,
+	)
 
 	// Execute the query.
 	sql, args := ib.Build()
 	fmt.Printf("Executing %s\n%s\n", sql, args)
 
-	err := Transact(db, func(tx *sqlx.Tx) error {
+	err = Transact(db, func(tx *sqlx.Tx) error {
 		if _, err := tx.Exec(sql, args...); err != nil {
 			return err
 		}
@@ -68,7 +81,23 @@ func CreateUser(db *sqlx.DB, user model.User) (string, error) {
 func GetUserById(db *sqlx.DB, userId string) (model.User, error) {
 	sb := gsb.PostgreSQL.NewSelectBuilder()
 
-	sb.Select("id", "facebook_id", "google_id", "instagram_id", "spotify_id", "first_name", "last_name", "email", "birthday", "gender", "onboarded", "permission_level", "created_at", "updated_at")
+	sb.Select(
+		"id",
+		"facebook_id",
+		"google_id",
+		"instagram_id",
+		"spotify_id",
+		"first_name",
+		"last_name",
+		"email",
+		"birthday",
+		"gender",
+		"onboarded",
+		"permission_level",
+		"email_verified",
+		"created_at",
+		"updated_at",
+	)
 	sb.From("users")
 	sb.Where(sb.Equal("id", userId))
 
@@ -88,7 +117,23 @@ func GetUserById(db *sqlx.DB, userId string) (model.User, error) {
 func GetUserByField(db *sqlx.DB, fieldName string, fieldValue string) (model.User, error) {
 	sb := gsb.PostgreSQL.NewSelectBuilder()
 
-	sb.Select("id", "facebook_id", "google_id", "instagram_id", "spotify_id", "first_name", "last_name", "email", "birthday", "gender", "onboarded", "permission_level", "created_at", "updated_at")
+	sb.Select(
+		"id",
+		"facebook_id",
+		"google_id",
+		"instagram_id",
+		"spotify_id",
+		"first_name",
+		"last_name",
+		"email",
+		"birthday",
+		"gender",
+		"onboarded",
+		"permission_level",
+		"email_verified",
+		"created_at",
+		"updated_at",
+	)
 	sb.From("users")
 	sb.Where(sb.Equal(fieldName, fieldValue))
 

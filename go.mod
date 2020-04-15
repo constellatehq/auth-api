@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/cosiner/argv v0.1.0 // indirect
+	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-delve/delve v1.4.0 // indirect
 	github.com/golang-migrate/migrate v3.5.4+incompatible
@@ -29,8 +30,10 @@ require (
 	github.com/rs/cors v1.7.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.5.0 // indirect
+	github.com/sony/sonyflake v1.0.0
 	github.com/spf13/cobra v0.0.7 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/testify v1.4.0
 	github.com/urfave/negroni v1.0.0
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	go.starlark.net v0.0.0-20200330013621-be5394c419b6 // indirect

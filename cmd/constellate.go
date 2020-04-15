@@ -19,6 +19,7 @@ import (
 	"github.com/constellatehq/auth-api/routes"
 	facebookClient "github.com/constellatehq/auth-api/server/clients/facebook"
 	googleClient "github.com/constellatehq/auth-api/server/clients/google"
+	"github.com/constellatehq/auth-api/server/utilities"
 )
 
 type Status struct {
@@ -36,6 +37,7 @@ func init() {
 	}
 
 	config.InitEnv()
+	utilities.InitSonyflake()
 
 	googleClient.InitClient()
 	facebookClient.InitClient()

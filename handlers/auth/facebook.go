@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,7 +16,6 @@ import (
 	fb "github.com/huandu/facebook"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/oauth2"
-	null "gopkg.in/guregu/null.v3"
 )
 
 func GetFacebookClientID() string {
@@ -96,12 +94,12 @@ func getFacebookUserInfo(db *sqlx.DB, accessToken string) (*schema.FacebookUserI
 	}
 
 	var user model.User
-	user.FacebookId = null.String{sql.NullString{String: userInfoResponse.Id, Valid: true}}
+	user.FacebookId = &userInfoResponse.Id
 	user.FirstName = userInfoResponse.FirstName
 	user.LastName = userInfoResponse.LastName
 	user.Email = userInfoResponse.Email
-	user.Birthday = null.Time{Time: userInfoResponse.Birthday, Valid: true}
-	user.Gender = null.String{sql.NullString{String: userInfoResponse.Gender, Valid: true}}
+	user.Birthday = &userInfoResponse.Birthday
+	// user.Gender = &userInfoResponse.Gender
 
 	_, err = repository.CreateUserIfNotExists(db, "email", userInfoResponse.Email, user)
 	switch err {

@@ -11,11 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type User struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
 func UserProfileHandler(env *model.Env, w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	fmt.Printf("User id from param: %s\n", id)
